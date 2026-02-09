@@ -1,0 +1,72 @@
+{
+  "name": "@aicujp/ui",
+  "version": "0.1.0",
+  "description": "Liquid Glass UI components for React — by AICU Inc.",
+  "author": "AICU Inc. <info@aicu.ai>",
+  "license": "MIT",
+  "homepage": "https://github.com/aicuai/ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aicuai/ui.git"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "liquid-glass",
+    "glassmorphism",
+    "tailwindcss",
+    "aicu",
+    "navigation"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles": "./dist/styles/glass.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup && mkdir -p dist/styles && cp src/styles/glass.css dist/styles/glass.css",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm typecheck"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "lucide-react": {
+      "optional": true
+    }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

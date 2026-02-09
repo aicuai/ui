@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiquidGlassNav — @aicu/ui</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0b;
+    --text: #ffffff;
+    --text-dim: rgba(255,255,255,0.4);
+    --text-mid: rgba(255,255,255,0.5);
+    --text-hover: rgba(255,255,255,0.8);
+    --glass-bg: rgba(22,22,23,0.72);
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-highlight: rgba(255,255,255,0.09);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-border: rgba(255,255,255,0.06);
+    --card-hover: rgba(255,255,255,0.06);
+    --tag-bg: rgba(255,255,255,0.1);
+    --tag-text: rgba(255,255,255,0.6);
+    --code-bg: rgba(255,255,255,0.04);
+    --code-text: rgba(255,255,255,0.5);
+  }
+
+  .light {
+    --bg: #f5f5f7;
+    --text: #1a1a1a;
+    --text-dim: rgba(0,0,0,0.4);
+    --text-mid: rgba(0,0,0,0.4);
+    --text-hover: rgba(0,0,0,0.7);
+    --glass-bg: rgba(255,255,255,0.72);
+    --glass-border: rgba(0,0,0,0.06);
+    --glass-highlight: rgba(0,0,0,0.06);
+    --card-bg: rgba(255,255,255,0.6);
+    --card-border: rgba(0,0,0,0.04);
+    --card-hover: rgba(255,255,255,0.8);
+    --tag-bg: rgba(0,0,0,0.05);
+    --tag-text: rgba(0,0,0,0.5);
+    --code-bg: rgba(0,0,0,0.03);
+    --code-text: rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.5s, color 0.5s;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ambient glow */
+  .glow {
+    position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .glow-circle {
+    position: absolute; border-radius: 50%; filter: blur(120px);
+    transition: opacity 0.7s;
+  }
+  .glow-1 {
+    width: 600px; height: 600px; top: 10%; right: -10%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+    opacity: 0.07;
+  }
+  .glow-2 {
+    width: 400px; height: 400px; bottom: 20%; left: -5%;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    opacity: 0.05;
+  }
+  .light .glow-1 { opacity: 0.12; }
+  .light .glow-2 { opacity: 0.08; }
+
+  /* Header */
+  .header {
+    position: relative; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-box {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    background: rgba(255,255,255,0.1); color: white;
+  }
+  .light .logo-box { background: rgba(0,0,0,0.05); color: #1a1a1a; }
+  .pkg-name { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; opacity: 0.8; }
+  .version {
+    font-size: 10px; padding: 2px 6px; border-radius: 99px; font-weight: 500;
+    background: var(--tag-bg); color: var(--tag-text);
+  }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .ctrl-btn {
+    padding: 6px 12px; font-size: 12px; border-radius: 99px; border: none;
+    cursor: pointer; transition: all 0.15s;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,0.15); }
+  .light .ctrl-btn { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.5); }
+  .light .ctrl-btn:hover { background: rgba(0,0,0,0.1); }
+
+  /* Content */
+  .content {
+    position: relative; z-index: 10;
+    padding: 0 24px 140px; max-width: 520px; margin: 0 auto;
+    transition: padding-left 0.3s;
+  }
+  .content.side-mode { padding-left: 80px; max-width: 600px; }
+  .page-title {
+    font-size: 30px; font-weight: 700; letter-spacing: -0.03em;
+    margin: 32px 0 4px;
+  }
+  .page-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 32px; }
+
+  /* Cards */
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    padding: 16px; border-radius: 16px; border: 1px solid var(--card-border);
+    background: var(--card-bg); backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.2s;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    cursor: pointer;
+  }
+  .card:hover { background: var(--card-hover); }
+  .card-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .card-date { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .card-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 500;
+    background: var(--tag-bg); color: var(--tag-text); white-space: nowrap;
+  }
+  .empty-state {
+    text-align: center; padding: 64px 0; border-radius: 16px;
+    border: 1px solid var(--card-border); background: var(--card-bg);
+    color: var(--text-dim); font-size: 14px;
+  }
+
+  /* Code */
+  .usage-label {
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    margin: 48px 0 12px; letter-spacing: 0.05em;
+  }
+  .code-block {
+    font-size: 11px; line-height: 1.7; padding: 16px; border-radius: 12px;
+    background: var(--code-bg); color: var(--code-text);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    overflow-x: auto; white-space: pre; tab-size: 2;
+  }
+
+  /* ─── LiquidGlassNav ─── */
+  .liquid-nav {
+    position: fixed; z-index: 50;
+    display: flex; align-items: center; gap: 2px; padding: 4px;
+    border-radius: 80px;
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.24),
+      inset 0 0.5px 0 rgba(255,255,255,0.06);
+    transition: all 0.3s ease-out;
+  }
+  .liquid-nav.bottom {
+    bottom: 20px; left: 50%; transform: translateX(-50%);
+    flex-direction: row;
+  }
+  .liquid-nav.left {
+    left: 16px; top: 50%; transform: translateY(-50%);
+    flex-direction: column;
+  }
+
+  /* Active indicator */
+  .nav-indicator {
+    position: absolute; border-radius: 72px;
+    background: var(--glass-highlight);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  /* Nav items */
+  .nav-item {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 16px; min-width: 44px; min-height: 44px;
+    border-radius: 72px; border: none; background: none;
+    cursor: pointer; transition: color 0.15s;
+    color: var(--text-mid);
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  .nav-item:focus-visible {
+    box-shadow: 0 0 0 2px rgba(96,165,250,0.5);
+  }
+  .nav-item:hover { color: var(--text-hover); }
+  .nav-item.active { color: var(--text); }
+  .nav-item svg {
+    width: 20px; height: 20px; flex-shrink: 0;
+    transition: stroke-width 0.15s;
+  }
+  .nav-item.active svg { stroke-width: 2; }
+
+  /* Label animation */
+  .nav-label {
+    font-size: 13px; font-weight: 500; line-height: 1;
+    letter-spacing: -0.01em; white-space: nowrap;
+    max-width: 0; opacity: 0; overflow: hidden;
+    transition: max-width 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+    padding-right: 0;
+  }
+  .nav-item.active .nav-label {
+    max-width: 80px; opacity: 1; padding-right: 2px;
+  }
+  .left .nav-label { display: none; }
+
+  /* Mobile responsive */
+  @media (max-width: 480px) {
+    .header { padding: 16px; }
+    .content { padding: 0 16px 140px; }
+    .page-title { font-size: 24px; }
+    .ctrl-btn { padding: 5px 10px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow">
+  <div class="glow-circle glow-1"></div>
+  <div class="glow-circle glow-2"></div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box">AI</div>
+    <span class="pkg-name">@aicu/ui</span>
+    <span class="version">v0.1.0</span>
+  </div>
+  <div class="header-right">
+    <button class="ctrl-btn" id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+    <button class="ctrl-btn" id="posBtn" onclick="togglePosition()">→ Side Rail</button>
+  </div>
+</div>
+
+<div class="content" id="contentArea">
+  <h1 class="page-title" id="pageTitle">Upcoming Events</h1>
+  <p class="page-sub" id="pageSub">LiquidGlassNav Demo — Bottom Pill mode</p>
+  <div id="pageCards"></div>
+
+  <p class="usage-label">USAGE</p>
+  <pre class="code-block" id="codeBlock"></pre>
+</div>
+
+<nav class="liquid-nav bottom" id="liquidNav">
+  <div class="nav-indicator" id="navIndicator"></div>
+</nav>
+
+<!-- SVG icon templates (hidden) -->
+<svg style="display:none">
+  <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+  </symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="icon-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+  </symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+</svg>
+
+<script>
+// ─── Data ───
+const bottomItems = [
+  { id: 'events',        label: 'Events',  icon: 'icon-calendar' },
+  { id: 'search',        label: 'Search',  icon: 'icon-search' },
+  { id: 'notifications', label: 'Alerts',  icon: 'icon-bell' },
+  { id: 'profile',       label: 'Profile', icon: 'icon-user' },
+];
+
+const sideItems = [
+  { id: 'home',     label: 'Home',     icon: 'icon-home' },
+  { id: 'events',   label: 'Events',   icon: 'icon-calendar' },
+  { id: 'search',   label: 'Search',   icon: 'icon-search' },
+  { id: 'settings', label: 'Settings', icon: 'icon-settings' },
+];
+
+const pages = {
+  events: {
+    title: 'Upcoming Events',
+    cards: [
+      { name: 'Gemini 3 ハッカソン 東京', date: 'Feb 15, 2026', tag: 'Hackathon' },
+      { name: 'AICU Creative AI Workshop', date: 'Feb 22, 2026', tag: 'Workshop' },
+      { name: 'ComfyUI Meetup Shibuya', date: 'Mar 1, 2026', tag: 'Meetup' },
+    ]
+  },
+  search:        { title: 'Search', cards: [] },
+  notifications: {
+    title: 'Notifications',
+    cards: [
+      { name: 'New registration: Bookathon #3', date: '2 hours ago', tag: 'New' },
+      { name: 'Contest submission received', date: 'Yesterday', tag: 'Info' },
+    ]
+  },
+  profile:  { title: 'Profile', cards: [] },
+  home:     { title: 'Home', cards: [] },
+  settings: { title: 'Settings', cards: [] },
+};
+
+// ─── State ───
+let theme = 'dark';
+let position = 'bottom';
+let activeId = 'events';
+
+// ─── Render nav ───
+function renderNav() {
+  const nav = document.getElementById('liquidNav');
+  const items = position === 'bottom' ? bottomItems : sideItems;
+
+  // Reset class
+  nav.className = 'liquid-nav ' + position;
+
+  // Clear old buttons (keep indicator)
+  const indicator = document.getElementById('navIndicator');
+  nav.innerHTML = '';
+  nav.appendChild(indicator);
+
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (item.id === activeId ? ' active' : '');
+    btn.setAttribute('data-nav-id', item.id);
+    btn.setAttribute('aria-label', item.label);
+    if (item.id === activeId) btn.setAttribute('aria-current', 'page');
+    btn.innerHTML = `
+      <svg><use href="#${item.icon}"/></svg>
+      <span class="nav-label">${item.label}</span>
+    `;
+    btn.addEventListener('click', () => {
+      activeId = item.id;
+      renderNav();
+      renderPage();
+    });
+    nav.appendChild(btn);
+  });
+
+  // Position indicator
+  requestAnimationFrame(() => {
+    const activeBtn = nav.querySelector('.nav-item.active');
+    if (activeBtn) {
+      const navRect = nav.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      if (position === 'bottom') {
+        indicator.style.left = (btnRect.left - navRect.left) + 'px';
+        indicator.style.width = btnRect.width + 'px';
+        indicator.style.top = '0';
+        indicator.style.height = '100%';
+      } else {
+        indicator.style.top = (btnRect.top - navRect.top) + 'px';
+        indicator.style.height = btnRect.height + 'px';
+        indicator.style.left = '0';
+        indicator.style.width = '100%';
+      }
+      indicator.style.opacity = '1';
+    }
+  });
+}
+
+// ─── Render page content ───
+function renderPage() {
+  const page = pages[activeId] || pages.events;
+  document.getElementById('pageTitle').textContent = page.title;
+  document.getElementById('pageSub').textContent =
+    `LiquidGlassNav Demo — ${position === 'bottom' ? 'Bottom Pill' : 'Side Rail'} mode`;
+
+  const container = document.getElementById('pageCards');
+  if (page.cards.length > 0) {
+    container.innerHTML = '<div class="cards">' + page.cards.map((c, i) => `
+      <div class="card" style="animation: fadeIn 0.3s ease ${i * 80}ms both">
+        <div>
+          <div class="card-name">${c.name}</div>
+          <div class="card-date">${c.date}</div>
+        </div>
+        <span class="card-tag">${c.tag}</span>
+      </div>
+    `).join('') + '</div>';
+  } else {
+    container.innerHTML = '<div class="empty-state">No content yet</div>';
+  }
+
+  // Update code block
+  document.getElementById('codeBlock').textContent =
+`import { LiquidGlassNav } from "@aicu/ui";
+import { Calendar, Search, User } from "lucide-react";
+
+<LiquidGlassNav
+  items={[
+    { id: "events", label: "Events", icon: Calendar },
+    { id: "search", label: "Search", icon: Search },
+    { id: "profile", label: "Profile", icon: User },
+  ]}
+  theme="${theme}"
+  position="${position}"
+  onSelect={(id) => navigate(id)}
+/>`;
+
+  // Content padding for side mode
+  const content = document.getElementById('contentArea');
+  content.classList.toggle('side-mode', position === 'left');
+}
+
+// ─── Toggle functions ───
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.body.classList.toggle('light', theme === 'light');
+  document.getElementById('themeBtn').textContent = theme === 'dark' ? '☀ Light' : '● Dark';
+  renderPage();
+}
+
+function togglePosition() {
+  position = position === 'bottom' ? 'left' : 'bottom';
+  // Reset active to a valid item for the new nav
+  const items = position === 'bottom' ? bottomItems : sideItems;
+  if (!items.find(i => i.id === activeId)) activeId = items[0].id;
+  document.getElementById('posBtn').textContent =
+    position === 'bottom' ? '→ Side Rail' : '↓ Bottom Pill';
+  renderNav();
+  renderPage();
+}
+
+// ─── Card fade-in animation ───
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+document.head.appendChild(style);
+
+// ─── Init ───
+renderNav();
+renderPage();
+</script>
+</body>
+</html>
