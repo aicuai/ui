@@ -19,6 +19,7 @@
     "aicu",
     "navigation"
   ],
+  "packageManager": "pnpm@10.24.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
