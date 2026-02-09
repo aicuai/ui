@@ -1,4 +1,4 @@
-# CLAUDE.md — @aicu/ui
+# CLAUDE.md — @aicujp/ui
 
 ## 絶対禁止事項
 
@@ -115,7 +115,7 @@ pnpm build
 
 ```js
 content: [
-  "./node_modules/@aicu/ui/dist/**/*.{js,mjs}",
+  "./node_modules/@aicujp/ui/dist/**/*.{js,mjs}",
 ]
 ```
 

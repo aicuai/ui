@@ -1,4 +1,4 @@
-# SKILLS.md — @aicu/ui 実装パターン集
+# SKILLS.md — @aicujp/ui 実装パターン集
 
 ## 1. Liquid Glass 基本パターン
 

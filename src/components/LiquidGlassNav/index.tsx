@@ -17,7 +17,7 @@ import type { LiquidGlassNavProps } from "./types";
  *
  * @example
  * ```tsx
- * import { LiquidGlassNav } from "@aicu/ui";
+ * import { LiquidGlassNav } from "@aicujp/ui";
  * import { Calendar, Search, User } from "lucide-react";
  *
  * <LiquidGlassNav

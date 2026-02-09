@@ -1,11 +1,11 @@
-# @aicu/ui — AI Coding Agent Guide
+# @aicujp/ui — AI Coding Agent Guide
 
 ## プロジェクト概要
 
 AICU Inc. の共通UIコンポーネントライブラリ。
 Apple Liquid Glass デザイン言語にインスパイアされた、モダンなガラス質感のUIコンポーネントを提供する。
 
-**npm パッケージ名**: `@aicu/ui`
+**npm パッケージ名**: `@aicujp/ui`
 **ライセンス**: MIT
 **対象フレームワーク**: React 18+ / Next.js 14+ (App Router)
 **スタイリング**: Tailwind CSS v3/v4 (peer dependency)
@@ -13,7 +13,7 @@ Apple Liquid Glass デザイン言語にインスパイアされた、モダン�
 ## ディレクトリ構成
 
 ```
-@aicu/ui/
+@aicujp/ui/
 ├── src/
 │   ├── components/           # UIコンポーネント
 │   │   └── LiquidGlassNav/

@@ -1,4 +1,4 @@
-# @aicu/ui
+# @aicujp/ui
 
 > Liquid Glass UI components for React — by [AICU Inc.](https://aicu.ai)
 
@@ -7,9 +7,9 @@ Apple Liquid Glass デザイン言語にインスパイアされた、ガラス�
 ## Install
 
 ```bash
-npm install @aicu/ui
+npm install @aicujp/ui
 # or
-pnpm add @aicu/ui
+pnpm add @aicujp/ui
 ```
 
 **Peer Dependencies:**
@@ -21,7 +21,7 @@ npm install react react-dom tailwindcss lucide-react
 ## Quick Start
 
 ```tsx
-import { LiquidGlassNav } from "@aicu/ui";
+import { LiquidGlassNav } from "@aicujp/ui";
 import { Calendar, Search, User } from "lucide-react";
 
 export default function App() {
@@ -42,14 +42,14 @@ export default function App() {
 
 ## Tailwind Config
 
-Add `@aicu/ui` to your content paths:
+Add `@aicujp/ui` to your content paths:
 
 ```js
 // tailwind.config.js
 module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@aicu/ui/dist/**/*.{js,mjs}",
+    "./node_modules/@aicujp/ui/dist/**/*.{js,mjs}",
   ],
 };
 ```
